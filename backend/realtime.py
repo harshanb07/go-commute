@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -12,9 +13,24 @@ BASE_URL = "https://api.openmetrolinx.com/OpenDataAPI/api/V1"
 HEADERS = {"Accept": "application/json"} #getting response back in json
 TORONTO = ZoneInfo("America/Toronto") #to have a clear indicator of toronto time 
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+ROUTES = {
+    "be-un": ("BE", "GT - Union Station"),
+}
+CACHE_SECONDS = 60 #in case someone spams fastAPI with 10000 requests in 1 minute, only 1 request will actually go to server
+_cache = {} #stop_code --> (saved_at, lines)
+
 
 
 def get_next_service(stop_code):
+    #before we try and call the api for next stops, let's check the cache
+
+    cached = _cache.get(stop_code)
+
+    if cached and time.time() - cached[0] < CACHE_SECONDS:
+        return cached[1]
+    
+    print("fetching from Metrolinx")
+    
     url = f"{BASE_URL}/Stop/NextService/{stop_code}"
     # The API call follows GET api/V1/Stop/NextService/{StopCode}, BE=Bramalea
 
@@ -27,7 +43,9 @@ def get_next_service(stop_code):
         raise RuntimeError(data["Metadata"]["ErrorMessage"])
     next_service = data.get("NextService") or {}
     
-    return next_service.get("Lines") or []
+    lines = next_service.get("Lines") or []
+    _cache[stop_code] = (time.time(), lines)
+    return lines
     # we use .get() to prevent crashes
 
 def filter_direction(lines, direction_name):

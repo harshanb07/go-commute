@@ -60,8 +60,8 @@ Scriptable widget (JS, iPhone)  →  FastAPI (Python, Google Cloud Run)  →  Me
 - [ ] No crash when there are no trips (late night)
 - [ ] Clear error state if backend/Metrolinx/network fails ("Couldn't fetch data – tap to retry")
 - [ ] Anti-spam:
-  - [ ] Cache Metrolinx responses ~60s per stop
-  - [ ] Allowlist of preset routes (reject everything else with 400)
+  - [x] Cache Metrolinx responses ~60s per stop
+  - [x] Allowlist of preset routes (reject everything else with 400)
   - [ ] Google Cloud budget alert at $1
   - [ ] Cloud Run max instances = 1
   - [x] Timeout on outbound Metrolinx calls
