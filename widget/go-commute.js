@@ -1,16 +1,25 @@
-// GO Commute widget (v1 test) for Scriptable
-// Set the route per widget: long-press widget → Edit Widget → Parameter (e.g. BE-UN)
+// GO Commute widget (v1) for Scriptable
+// Set the route per widget: long-press widget → Edit Widget → Parameter (e.g. BE-UN, MO-MC)
 
 const API = "https://go-commute-api-602387977262.northamerica-northeast2.run.app";
-const DEFAULT_ROUTE = "BE-UN"; // must match a key in ROUTES on the backend
-const ROUTE = (args.widgetParameter || DEFAULT_ROUTE).trim();
+const DEFAULT_ROUTE = "BE-UN"; // must match a key in ROUTES on the backend (case doesn't matter)
+const ROUTE = (args.widgetParameter || DEFAULT_ROUTE).trim().toUpperCase();
+
+// Friendly titles; unknown routes fall back to "XX → YY"
+const TITLES = {
+  "BE-UN": "Bramalea → Union",
+  "MO-MC": "Mount Pleasant → McMaster",
+};
 
 const C = {
-  bg1: new Color("#0b3d2e"),
-  bg2: new Color("#145c43"),
+  bg1: new Color("#1c1c1e"),   // iOS dark gray
+  bg2: new Color("#2c2c2e"),
   text: Color.white(),
-  dim: new Color("#b8e0d2"),
-  warn: new Color("#ff9f43"),
+  dim: new Color("#8e8e93"),
+  divider: new Color("#3a3a3c"),
+  ok: new Color("#30d158"),    // on time
+  warn: new Color("#ffd60a"),  // 1–4 min late
+  late: new Color("#ff453a"),  // 5+ min late
 };
 
 // ---------- data ----------
@@ -39,6 +48,13 @@ function clock(d) {
   return f.string(d);
 }
 
+// Pick a color + label from how late the trip is
+function delayStatus(delayMin) {
+  if (delayMin >= 5) return { color: C.late, label: `+${delayMin} min` };
+  if (delayMin >= 1) return { color: C.warn, label: `+${delayMin} min` };
+  return { color: C.ok, label: "On time" };
+}
+
 // ---------- ui ----------
 function baseWidget() {
   const w = new ListWidget();
@@ -48,10 +64,12 @@ function baseWidget() {
   w.backgroundGradient = g;
   w.setPadding(12, 14, 10, 14);
 
-  const title = w.addText(ROUTE.replace("-", " → "));
-  title.font = Font.boldSystemFont(13);
+  const title = w.addText(TITLES[ROUTE] || ROUTE.replace("-", " → "));
+  title.font = Font.boldSystemFont(14);
   title.textColor = C.text;
-  w.addSpacer(6);
+  title.lineLimit = 1;
+  title.minimumScaleFactor = 0.7;
+  w.addSpacer(8);
   return w;
 }
 
@@ -68,17 +86,25 @@ function footer(w) {
   const f = w.addText(`Updated ${clock(new Date())} · Data: Metrolinx`);
   f.font = Font.systemFont(9);
   f.textColor = C.dim;
-  f.textOpacity = 0.8;
 }
 
 function row(w, dep) {
   const departs = new Date(dep.departs);
+  const status = delayStatus(dep.delay_min);
+
   const r = w.addStack();
   r.centerAlignContent();
 
+  // colored bar on the left = status at a glance
+  const bar = r.addStack();
+  bar.size = new Size(3, 20);
+  bar.backgroundColor = status.color;
+  bar.cornerRadius = 1.5;
+  r.addSpacer(8);
+
   const time = r.addText(clock(departs));
   time.font = Font.boldMonospacedSystemFont(17);
-  time.textColor = C.text;
+  time.textColor = dep.delay_min >= 1 ? status.color : C.text;
 
   r.addSpacer(8);
 
@@ -88,17 +114,17 @@ function row(w, dep) {
 
   r.addSpacer();
 
-  if (dep.delay_min > 0) {
-    const late = r.addText(`+${dep.delay_min}  `);
-    late.font = Font.boldSystemFont(12);
-    late.textColor = C.warn;
-  }
+  const st = r.addText(status.label);
+  st.font = Font.semiboldSystemFont(12);
+  st.textColor = status.color;
+
+  r.addSpacer(10);
 
   const plat = r.addText(dep.platform ? `P${dep.platform}` : "P–");
-  plat.font = Font.mediumSystemFont(13);
+  plat.font = Font.mediumMonospacedSystemFont(13);
   plat.textColor = C.dim;
 
-  w.addSpacer(4);
+  w.addSpacer(5);
 }
 
 // ---------- main ----------

@@ -84,3 +84,6 @@ Scriptable widget (JS, iPhone)  →  FastAPI (Python, Google Cloud Run)  →  Me
 - 2026-11-13: API key is in Secret Manager as `go-api-key`; Cloud Run's compute service account has secretAccessor on it. Deploy with `--set-secrets GO_API_KEY=go-api-key:latest`.
 - 2026-11-13: $1 budget alert set on Cloud Run for this project. Max instances = 1.
 - 2026-11-13: Scriptable widget working end-to-end (route via widget Parameter, countdown on phone, Metrolinx attribution in footer).
+- 2026-11-14: adding route 43 Mount Pleasant GO → McMaster. From public GTFS: bus stop code `00296` ("Mount Pleasant GO Bus", not the train code `MO`); headsign toward McMaster is "43 - McMaster U" (other way: "43 - Mount Pleasant GO"). Not yet confirmed that NextService's `DirectionName` matches the headsign.
+- 2026-11-14: widget redesign: dark gray background + color-code departures by delay. Teaching mode for go-commute.js (first time writing JS; explain via Python comparisons, small blocks, wait for "next").
+- 2026-11-14: switched to "just write it" for the widget redesign. Claude wrote it: dark gray bg, delay colors (green on time / yellow 1–4 / red 5+), friendly route titles. Backend lowercases the route key, so "MO-MC" and "mo-mc" both work.

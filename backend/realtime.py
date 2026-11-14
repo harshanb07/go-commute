@@ -15,6 +15,7 @@ TORONTO = ZoneInfo("America/Toronto") #to have a clear indicator of toronto time
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 ROUTES = {
     "be-un": ("BE", "GT - Union Station"),
+    "mo-mc":("00296", "43 - McMaster U")
 }
 CACHE_SECONDS = 60 #in case someone spams fastAPI with 10000 requests in 1 minute, only 1 request will actually go to server
 _cache = {} #stop_code --> (saved_at, lines)

@@ -6,6 +6,7 @@ app = FastAPI() #creates our web app
 
 @app.get("/departures/{route}") #when someone sends a GET request to /departures, run function below
 def departures(route: str):
+    route = route.lower() # widget sends "BE-UN", keys are lowercase
     if route not in ROUTES:
         raise HTTPException(status_code=400, detail="Unknown route") #this is important to someone can't spam the server for a bunch of requests for a route that don't exist 
     
