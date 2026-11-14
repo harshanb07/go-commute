@@ -59,13 +59,13 @@ Scriptable widget (JS, iPhone)  →  FastAPI (Python, Google Cloud Run)  →  Me
 - [ ] Countdown: minutes when < 60, hour format when ≥ 60 (computed on phone)
 - [ ] No crash when there are no trips (late night)
 - [ ] Clear error state if backend/Metrolinx/network fails ("Couldn't fetch data – tap to retry")
-- [ ] Anti-spam:
+- [x] Anti-spam:
   - [x] Cache Metrolinx responses ~60s per stop
   - [x] Allowlist of preset routes (reject everything else with 400)
-  - [ ] Google Cloud budget alert at $1
-  - [ ] Cloud Run max instances = 1
+  - [x] Google Cloud budget alert at $1
+  - [x] Cloud Run max instances = 1
   - [x] Timeout on outbound Metrolinx calls
-- [ ] Metrolinx attribution (needed once friends use it)
+- [x] Metrolinx attribution (needed once friends use it)
 - [ ] 5+ people using it and giving feedback
 
 ## Future (not v1)
@@ -80,3 +80,7 @@ Scriptable widget (JS, iPhone)  →  FastAPI (Python, Google Cloud Run)  →  Me
 - 2026-11-13: changed pace: give a couple lines (small block) per step, not one
 - 2026-11-13: backend returns delay in minutes (Computed − Scheduled) so widget can show "+3" in orange
 - 2026-11-13: phone (not backend) skips departures already in the past, since its clock is current
+- 2026-11-13: Deployed to Cloud Run. Project `commute-widget-hb`, service `go-commute-api`, region `northamerica-northeast2`. URL: https://go-commute-api-602387977262.northamerica-northeast2.run.app
+- 2026-11-13: API key is in Secret Manager as `go-api-key`; Cloud Run's compute service account has secretAccessor on it. Deploy with `--set-secrets GO_API_KEY=go-api-key:latest`.
+- 2026-11-13: $1 budget alert set on Cloud Run for this project. Max instances = 1.
+- 2026-11-13: Scriptable widget working end-to-end (route via widget Parameter, countdown on phone, Metrolinx attribution in footer).
