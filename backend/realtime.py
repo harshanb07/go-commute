@@ -15,7 +15,8 @@ TORONTO = ZoneInfo("America/Toronto") #to have a clear indicator of toronto time
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 ROUTES = {
     "be-un": ("BE", "GT - Union Station"),
-    "mo-mc":("00296", "43 - McMaster U")
+    "mo-mc":("00296", "43 - McMaster U"),
+    "mc-mo": ("00310", "43 - Mount Pleasant GO"),
 }
 CACHE_SECONDS = 60 #in case someone spams fastAPI with 10000 requests in 1 minute, only 1 request will actually go to server
 _cache = {} #stop_code --> (saved_at, lines)
@@ -40,8 +41,13 @@ def get_next_service(stop_code):
     resp.raise_for_status() #raises error incase we get a 4xx/5xx status code...
     
     data = resp.json() #data is like a python dict
+
+    if data["Metadata"]["ErrorMessage"] == "No Content":
+        _cache[stop_code] = (time.time(), [])
+        return []
     if data["Metadata"]["ErrorCode"] != "200":
         raise RuntimeError(data["Metadata"]["ErrorMessage"])
+
     next_service = data.get("NextService") or {}
     
     lines = next_service.get("Lines") or []
